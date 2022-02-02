@@ -12,7 +12,7 @@ optional arguments:
   -N [NAMES ...], --names [NAMES ...]
                         Give an identifier for the energies
                         
-Example usage and output.
+Example:
 
 $ python Boltzmanncalc.py --relg 0.0 0.44 1.71 -T 273.15 298.15 373.15 -N c1 c2 c3
 
