@@ -1,9 +1,11 @@
 import argparse
 import pandas as pd
+from math import e
 
 ### CONSTANTS
 Rgas = 0.00198720 # kcal/mol
-euler = 2.718281828459045
+# euler = 2.718281828459045
+euler = e
 
 def boltzmann(dGlist, Tlist, names):
     Tlist = sorted(Tlist, key = lambda x:float(x))
