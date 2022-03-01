@@ -11,8 +11,8 @@ def boltzmann(dGlist, Tlist, names):
     rawcolumns = []
     for T, dG in [(T,dG) for T in Tlist for dG in dGlist]:
         Wraw = euler**(-dG / (Rgas * T))
-        rawname = "Raw-" + str(T)
-        boltzname = "Boltzmann-" + str(T) 
+        rawname = f"Raw-{T}"
+        boltzname = f"Boltzmann-{T}" 
         try:
             Boltzdict[rawname].append(round(Wraw, 4))
         except KeyError:
