@@ -1,6 +1,6 @@
 import argparse
 import pandas as pd
-from math import e
+from math import e, log
 
 ### CONSTANTS
 R_dict = {'kcal': 0.00198720, 'kJ': 0.00831446}
@@ -26,7 +26,7 @@ class Bpop(object):
         units = self.units
         origen = self.energies
         etype = self.etype
-        Tlist = sorted(Tlist, key = lambda x:float(x))
+        # Tlist = sorted(Tlist, key = lambda x:float(x))
         if etype == 'rel':
             Boltzdict = {"Name": names, f"∆G ({units}/mol)": origen}
             energies = origen
@@ -59,11 +59,47 @@ class Bpop(object):
         calcG = [round((ag - minG)*conv, 2) for ag in absoG]
         return calcG
 
-    def Gconf(self):
-        df = self.df
+    def Gboltz(self):
+        '''
+        Return a list of lists consisting of [T, Gboltz(T)] pairs, and [T, Gfinal(T)] pairs,
+        where Gboltz is the Boltzmann weighed absolute Gibbs free energy at temperature T and
+        Gfinal is Gboltz + Gconf.
+        '''
+        df = self.bdf
+        R = self.R
         Tlist = self.Tlist
-        pass
-        # return Gconf
+        Gconfs = self.Gconf()
+        conv = self.conv
+        Gboltzs = []
+        Gfinals = []
+        for i, T in enumerate(Tlist):
+            bwg = 0
+            for ag, bw in zip(df['G (a.u.)'], df[f"Boltzmann-{T}"]):
+                bwg += ag * bw
+            bwgf = Gconfs[i][1] / conv
+            bwgf = bwg + Gconfs[i][1] / conv 
+            Gboltzs.append([T, round(bwg, 7)])
+            Gfinals.append([T, round(bwgf, 7)])
+        return Gboltzs, Gfinals
+
+    def Gconf(self):
+        '''
+        Return a list of lists consisting of [T, Gconf(T)] pairs,
+        where Gconf is the Gibbs-Shannon entropy, Sconf, contribution in specific temperature T. 
+        '''
+        df = self.bdf
+        R = self.R
+        Tlist = self.Tlist
+        Gconfs = []
+        for T in Tlist:
+            wsum = 0
+            colname = f"Boltzmann-{T}"
+            for w in df[colname]:
+                wsum += w*log(w)
+            Sconf = -R * wsum
+            Gconf = round(-T*Sconf, 4)
+            Gconfs.append([T, Gconf])
+        return Gconfs
 
 CLI=argparse.ArgumentParser()
 CLI.add_argument(
@@ -117,13 +153,30 @@ def main():
         names = args.names
     else:
         names = energies
-    # R = R_dict[args.units]
-    # conv = auconv_dict[args.units]
-    # access CLI options
-    bpop = Bpop(energies=energies, Tlist=args.temperature, names=names, units=args.units, etype=etype)
+    Tlist = args.temperature
+    Tlist = sorted(Tlist, key = lambda x:float(x))
+    bpop = Bpop(energies=energies, Tlist=Tlist, names=names, units=args.units, etype=etype)
     # Boltzdf = bpop.boltzmannDF(energies=energies, Tlist=args.temperature, names=names, R=R, units=args.units, etype=etype)
     Boltzdf = bpop.boltzmannDF()
+    Gconf = bpop.Gconf()
     print(Boltzdf)
+    print('-------------')
+    print('Thermochemical data')
+    print('-------------')
+    for gc in Gconf:
+        print(f'Gconf({gc[0]} K) = {gc[1]} {args.units}/mol')
+    if etype == 'abs':
+        print('-------------')
+        print('Boltzmann weighed Gibbs free energies')
+        print('-------------')
+        Gboltz, Gfinals = bpop.Gboltz()
+        for gb in Gboltz:
+            print(f'Gboltz({gb[0]} K) = {gb[1]} a.u.')
+        print('-------------')
+        print('Final values with Gconf')
+        print('-------------')   
+        for gf in Gfinals:
+            print(f'Gboltz({gf[0]} K) = {gf[1]} a.u.') 
 
 if __name__ == '__main__':
     main()
