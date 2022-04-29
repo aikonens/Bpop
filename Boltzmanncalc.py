@@ -61,7 +61,7 @@ class Bpop(object):
 
     def Gboltz(self):
         '''
-        Return a list of lists consisting of [T, Gboltz(T)] pairs, and [T, Gfinal(T)] pairs,
+        Return a list of Gboltz(T) values and list of Gfinal(T) values,
         where Gboltz is the Boltzmann weighed absolute Gibbs free energy at temperature T and
         Gfinal is Gboltz + Gconf.
         '''
@@ -76,15 +76,15 @@ class Bpop(object):
             bwg = 0
             for ag, bw in zip(df['G (a.u.)'], df[f"Boltzmann-{T}"]):
                 bwg += ag * bw
-            bwgf = Gconfs[i][1] / conv
-            bwgf = bwg + Gconfs[i][1] / conv 
-            Gboltzs.append([T, round(bwg, 7)])
-            Gfinals.append([T, round(bwgf, 7)])
+            bwgf = Gconfs[i] / conv
+            bwgf = bwg + Gconfs[i] / conv 
+            Gboltzs.append(round(bwg, 7))
+            Gfinals.append(round(bwgf, 7))
         return Gboltzs, Gfinals
 
     def Gconf(self):
         '''
-        Return a list of lists consisting of [T, Gconf(T)] pairs,
+        Return a list of Gconf(T) values,
         where Gconf is the Gibbs-Shannon entropy, Sconf, contribution in specific temperature T. 
         '''
         df = self.bdf
@@ -98,7 +98,7 @@ class Bpop(object):
                 wsum += w*log(w)
             Sconf = -R * wsum
             Gconf = round(-T*Sconf, 4)
-            Gconfs.append([T, Gconf])
+            Gconfs.append(Gconf)
         return Gconfs
 
 CLI=argparse.ArgumentParser()
@@ -163,20 +163,20 @@ def main():
     print('-------------')
     print('Thermochemical data')
     print('-------------')
-    for gc in Gconf:
-        print(f'Gconf({gc[0]} K) = {gc[1]} {args.units}/mol')
+    for T, gc in zip(Tlist, Gconf):
+        print(f'Gconf({T} K) = {gc} {args.units}/mol')
     if etype == 'abs':
         print('-------------')
         print('Boltzmann weighed Gibbs free energies')
         print('-------------')
         Gboltz, Gfinals = bpop.Gboltz()
-        for gb in Gboltz:
-            print(f'Gboltz({gb[0]} K) = {gb[1]} a.u.')
+        for T, gb in zip(Tlist, Gboltz):
+            print(f'Gboltz({T} K) = {gb} a.u.')
         print('-------------')
         print('Final values with Gconf')
         print('-------------')   
-        for gf in Gfinals:
-            print(f'Gboltz({gf[0]} K) = {gf[1]} a.u.') 
+        for T, gf in zip(Tlist, Gfinals):
+            print(f'Gboltz({T} K) = {gf} a.u.') 
 
 if __name__ == '__main__':
     main()
