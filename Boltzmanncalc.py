@@ -137,6 +137,13 @@ CLI.add_argument(
   default='kcal',  # default if nothing is provided
   help="Give unit system: [kcal]/kJ",
 )
+CLI.add_argument(
+  "-o","--out",  # name on the CLI - drop the `--` for positional/required parameters
+  nargs="*",  # 0 or more values expected => creates a list
+  type=str,
+  default='bpop',  # default if nothing is provided
+  help="Write output to a file, indicate name after keyword",
+)
 
 def main():
     args = CLI.parse_args()
@@ -156,27 +163,26 @@ def main():
     Tlist = args.temperature
     Tlist = sorted(Tlist, key = lambda x:float(x))
     bpop = Bpop(energies=energies, Tlist=Tlist, names=names, units=args.units, etype=etype)
-    # Boltzdf = bpop.boltzmannDF(energies=energies, Tlist=args.temperature, names=names, R=R, units=args.units, etype=etype)
     Boltzdf = bpop.boltzmannDF()
     Gconf = bpop.Gconf()
     print(Boltzdf)
-    print('-------------')
-    print('Thermochemical data')
-    print('-------------')
+    printlines = '-------------\nThermochemical data\n-------------\n' 
     for T, gc in zip(Tlist, Gconf):
-        print(f'Gconf({T} K) = {gc} {args.units}/mol')
+        printlines += f'Gconf({T} K) = {gc} {args.units}/mol\n'
     if etype == 'abs':
-        print('-------------')
-        print('Boltzmann weighed Gibbs free energies')
-        print('-------------')
+        printlines += '-------------\nBoltzmann weighed Gibbs free energies\n-------------'
         Gboltz, Gfinals = bpop.Gboltz()
         for T, gb in zip(Tlist, Gboltz):
-            print(f'Gboltz({T} K) = {gb} a.u.')
-        print('-------------')
-        print('Final values with Gconf')
-        print('-------------')   
+            printlines += f'Gboltz({T} K) = {gb} a.u.\n'
+        printlines += '-------------\nFinal values with Gconf\n-------------\n'  
         for T, gf in zip(Tlist, Gfinals):
-            print(f'Gboltz({T} K) = {gf} a.u.') 
+            printlines += f'Gboltz({T} K) = {gf} a.u.\n'
+    print(printlines)
+    if args.out:
+        outname = args.out
+        Boltzdf.to_csv(f'{outname}.csv')
+        with open(f'{outname}.out', 'w') as f:
+            f.write(printlines)
 
 if __name__ == '__main__':
     main()
