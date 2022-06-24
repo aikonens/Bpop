@@ -1,5 +1,7 @@
 # Bpop
-A very simple Boltzmann population calculator for user supplied relative energies. Outputs a pandas dataframe.
+A very simple Boltzmann population calculator for user supplied relative energies. Outputs a pandas dataframe on commandline, can be called in Jupyter notebook.
+
+To use it as a Python module, add directory to your PYTHONPATH
 
 usage: __main__.py [-h] [-dG [RELG [RELG ...]]] [-G [ABSG [ABSG ...]]] [-T [TEMPERATURE [TEMPERATURE ...]]] [-N [NAMES [NAMES ...]]] [-u UNITS]
                    [-o [OUT [OUT ...]]]
