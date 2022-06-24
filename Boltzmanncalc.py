@@ -48,7 +48,8 @@ class Bpop(object):
             bcolumn = rawcolumn.replace("Raw", "Boltzmann")
             for raw in Boltzdict[rawcolumn]:
                 boltz = raw / sum(Boltzdict[rawcolumn])
-                Boltzdict[bcolumn].append(round(boltz, 4))
+                # Boltzdict[bcolumn].append(round(boltz, 4))
+                Boltzdict[bcolumn].append(boltz)
             Boltzdict.pop(rawcolumn, None)
         return pd.DataFrame(Boltzdict)
     
@@ -65,6 +66,8 @@ class Bpop(object):
         where Gboltz is the Boltzmann weighed absolute Gibbs free energy at temperature T and
         Gfinal is Gboltz + Gconf.
         '''
+        if self.etype == 'rel':
+            raise ValueError('Only relative energies supplied, we need absolute energies') 
         df = self.bdf
         R = self.R
         Tlist = self.Tlist
@@ -95,7 +98,10 @@ class Bpop(object):
             wsum = 0
             colname = f"Boltzmann-{T}"
             for w in df[colname]:
-                wsum += w*log(w)
+                try:
+                    wsum += w*log(w)
+                except ValueError:
+                    print("Boltzmann weigh is <0.01%, skipping.")
             Sconf = -R * wsum
             Gconf = round(-T*Sconf, 4)
             Gconfs.append(Gconf)
@@ -170,7 +176,7 @@ def main():
     for T, gc in zip(Tlist, Gconf):
         printlines += f'Gconf({T} K) = {gc} {args.units}/mol\n'
     if etype == 'abs':
-        printlines += '-------------\nBoltzmann weighed Gibbs free energies\n-------------'
+        printlines += '-------------\nBoltzmann weighed Gibbs free energies\n-------------\n'
         Gboltz, Gfinals = bpop.Gboltz()
         for T, gb in zip(Tlist, Gboltz):
             printlines += f'Gboltz({T} K) = {gb} a.u.\n'
