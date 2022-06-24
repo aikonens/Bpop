@@ -60,6 +60,11 @@ class Bpop(object):
         calcG = [round((ag - minG)*conv, 2) for ag in absoG]
         return calcG
 
+    def Gmin(self):
+        if self.etype == 'rel':
+            raise ValueError('Only relative energies supplied, we need absolute energies') 
+        return min(self.energies)
+
     def Gboltz(self):
         '''
         Return a list of Gboltz(T) values and list of Gfinal(T) values,
@@ -176,6 +181,9 @@ def main():
     for T, gc in zip(Tlist, Gconf):
         printlines += f'Gconf({T} K) = {gc} {args.units}/mol\n'
     if etype == 'abs':
+        printlines += '-------------\nLowest energy conformer Gibbs free energies\n-------------\n'
+        Gmin = bpop.Gmin()
+        printlines += f'Gmin = {Gmin} a.u.\n'
         printlines += '-------------\nBoltzmann weighed Gibbs free energies\n-------------\n'
         Gboltz, Gfinals = bpop.Gboltz()
         for T, gb in zip(Tlist, Gboltz):

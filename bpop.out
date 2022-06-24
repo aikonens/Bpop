@@ -1,12 +1,16 @@
 -------------
 Thermochemical data
 -------------
-Gconf(298.15 K) = -0.0949 kcal/mol
+Gconf(298.15 K) = -0.0922 kcal/mol
+-------------
+Lowest energy conformer Gibbs free energies
+-------------
+Gmin = -76.589014 a.u.
 -------------
 Boltzmann weighed Gibbs free energies
 -------------
-Gboltz(298.15 K) = -596.5433108 a.u.
+Gboltz(298.15 K) = -76.5889018 a.u.
 -------------
 Final values with Gconf
 -------------
-Gboltz(298.15 K) = -596.5434621 a.u.
+Gboltz(298.15 K) = -76.5890488 a.u.
