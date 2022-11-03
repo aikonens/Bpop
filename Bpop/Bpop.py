@@ -9,7 +9,20 @@ euler = e
 
 class Bpop(object):
 
-    def __init__(self, energies=[0.0], Tlist=[298.15], names=['com1'], R=0.00198720, units='kcal', etype='rel'):
+    def __init__(self, 
+                energies: list=[0.0], 
+                Tlist: list=[298.15], 
+                names: list=['com1'], 
+                R: float=0.00198720, 
+                units: str='kcal', 
+                etype: str='rel'):
+    
+        '''
+        Compute the Boltzmann weighs, Boltzmann weighed energies, and ensemble free energies
+        Input energies are expected to be in hartrees (a.u.)
+        return : dataframe, dG_Boltz, dG_conf, dG_Boltz_dGconf
+        '''
+
         self.energies = energies
         self.Tlist = Tlist
         self.names = names
@@ -19,7 +32,7 @@ class Bpop(object):
         self.etype = etype
         self.bdf = self.boltzmannDF()
 
-    def boltzmannDF(self):
+    def boltzmannDF(self) -> pd.DataFrame:
         Tlist = self.Tlist
         names = self.names
         R = self.R
@@ -53,19 +66,19 @@ class Bpop(object):
             Boltzdict.pop(rawcolumn, None)
         return pd.DataFrame(Boltzdict)
     
-    def calcRel(self):
+    def calcRel(self) -> float:
         absoG = self.energies
         conv = self.conv
         minG = min(absoG)
         calcG = [round((ag - minG)*conv, 2) for ag in absoG]
         return calcG
 
-    def Gmin(self):
+    def Gmin(self) -> float:
         if self.etype == 'rel':
             raise ValueError('Only relative energies supplied, we need absolute energies') 
         return min(self.energies)
 
-    def Gboltz(self):
+    def Gboltz(self) -> float:
         '''
         Return a list of Gboltz(T) values and list of Gfinal(T) values,
         where Gboltz is the Boltzmann weighed absolute Gibbs free energy at temperature T and
@@ -90,7 +103,7 @@ class Bpop(object):
             Gfinals.append(round(bwgf, 7))
         return Gboltzs, Gfinals
 
-    def Gconf(self):
+    def Gconf(self) -> float:
         '''
         Return a list of Gconf(T) values,
         where Gconf is the Gibbs-Shannon entropy, Sconf, contribution in specific temperature T. 
@@ -166,7 +179,7 @@ def main():
         etype = 'abs'
         print(f"We use {etype} energies")
     else:
-        raise ValueError('No energies provided, nothing to do.')
+        raise AttributeError('No energies provided, nothing to do.')
     if args.names and len(args.names) == len(energies):
         names = args.names
     else:
