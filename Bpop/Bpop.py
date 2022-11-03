@@ -78,7 +78,7 @@ class Bpop(object):
             raise ValueError('Only relative energies supplied, we need absolute energies') 
         return min(self.energies)
 
-    def Gboltz(self) -> float:
+    def Gboltz(self) -> list:
         '''
         Return a list of Gboltz(T) values and list of Gfinal(T) values,
         where Gboltz is the Boltzmann weighed absolute Gibbs free energy at temperature T and
@@ -103,7 +103,7 @@ class Bpop(object):
             Gfinals.append(round(bwgf, 7))
         return Gboltzs, Gfinals
 
-    def Gconf(self) -> float:
+    def Gconf(self) -> list:
         '''
         Return a list of Gconf(T) values,
         where Gconf is the Gibbs-Shannon entropy, Sconf, contribution in specific temperature T. 
